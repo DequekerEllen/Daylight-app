@@ -1,4 +1,4 @@
-let url, city;
+let url, response, data;
 
 // _ = helper functions
 function _parseMillisecondsIntoReadableTime(timestamp) {
@@ -33,7 +33,13 @@ let placeSunAndStartMoving = (totalMinutes, sunrise) => {
 
 // 3 Met de data van de API kunnen we de app opvullen
 let showResult = (queryResponse) => {
-  getapi(url);
+  console.log(queryResponse);
+  let city = queryResponse.city.name;
+  let country = queryResponse.city.country;
+  let sunrise = queryResponse.city.sunrise;
+  let sunset = queryResponse.city.sunset;
+  console.log(city, country, sunrise, sunset);
+  document.querySelector('.js-location').innerHTML = `${city}, ${country}`;
   // We gaan eerst een paar onderdelen opvullen
   // Zorg dat de juiste locatie weergegeven wordt, volgens wat je uit de API terug krijgt.
   // Toon ook de juiste tijd voor de opkomst van de zon en de zonsondergang.
@@ -47,23 +53,24 @@ let getAPI = (lat, lon) => {
   let key = '9339325000688c95767d10f8748d3510';
   url = `http://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${key}&units=metric&lang=nl&cnt=1`;
   console.log(url);
-
+  //   Met de fetch API proberen we de data op te halen.
+  fetch(url)
+    .then(function (response) {
+      if (!response.ok) {
+        throw Error(`Looks like there was a problem. Status Code: ${response.status}`);
+      } else {
+        return response.json();
+      }
+    })
+    .then(function (jsonObject) {
+      showResult(jsonObject);
+    });
   // Als dat gelukt is, gaan we naar onze showResult functie.
 };
-
-// Met de fetch API proberen we de data op te halen.
-async function getapi(url) {
-  // Storing response
-  const response = await fetch(url);
-  // Storing data in form of JSON
-  var data = await response.json();
-  console.log(data);
-  city = data.city.name;
-}
 
 document.addEventListener('DOMContentLoaded', function () {
   console.log('**** Loaded ****');
   // 1 We will query the API with longitude and latitude.
   getAPI(50.8027841, 3.2097454);
-  showResult();
+  //   getapi();
 });
